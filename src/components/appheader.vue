@@ -1,31 +1,51 @@
 <template>
-    <header>
-        <router-link to="/">Home</router-link>
-        <router-link to="/login">Login</router-link>
-    </header>
+    <v-toolbar color="info" app>
+        <v-layout id="title">
+            <v-icon color="white" large id="icon">description</v-icon>
+            <v-toolbar-title class="white--text" @click="goHome">Report viewer</v-toolbar-title>
+        </v-layout>
+
+        <v-spacer/>
+        <v-toolbar-items id="items">
+            <v-btn flat @click="goToLink" class="white--text">
+                {{link}}
+            </v-btn>
+        </v-toolbar-items>
+    </v-toolbar>
 </template>
 
 <script>
     export default {
-        name: "appheader"
+        name: "appheader",
+        props: ['link'],
+        data() {
+            return {}
+        },
+        methods: {
+            goToLink() {
+                if (this.link === "home") {
+                    this.goHome();
+                    return;
+                }
+                this.$router.push(`${this.link}`)
+            },
+            goHome() {
+                this.$router.push('/');
+            }
+        }
     }
 </script>
 
 <style scoped>
-    header {
-        border-bottom: 1px rgba(21, 35, 27, .3) solid;
-        height: 60px;
+    #title {
+        cursor: pointer;
+        margin-left: 12%;
     }
-    a {
-        padding: 10px;
-        position: relative;
-        top: 5px;
-        left: 100px;
-        text-decoration: none;
-        font-size: xx-large;
-        font-weight: lighter;
+    #items {
+        margin-right: 12%;
     }
-    a:visited {
-        color: black;
+    #icon {
+        margin-right: -2%;
+        margin-top: -1%;
     }
 </style>
