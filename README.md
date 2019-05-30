@@ -11,6 +11,11 @@ Stack of the tools:
 * Maybe another tool that can help with parsing .xlsx and Google tables 
 * Maybe another useful plugin for Vue (like Vuex)
 
+## Home page
+![home page](/docs/images/RV-home.jpg "Home Page")
+## Login page
+![login page](/docs/images/RV-login.jpg "Login Page")
+
 
 ## Project setup
 ```

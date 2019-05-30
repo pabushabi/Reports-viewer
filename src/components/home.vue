@@ -1,7 +1,7 @@
 <template>
     <v-app>
         <appheader link="login"/>
-        <h1 class="text-xs-center ma-5 pa-5">It`s HOME!</h1>
+        <h1 class="text-xs-center mt-5 pt-5">It`s HOME!</h1>
         <v-layout align-center row justify-center>
             <v-data-table :headers="headers" :items="desserts" class="elevation-2" hide-actions :loading="!loaded">
                 <template v-slot:items="props">
