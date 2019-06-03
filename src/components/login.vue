@@ -14,7 +14,7 @@
                 <br>
                 <v-layout align-center justify-center>
                     <v-btn :color="valid ? 'info' : 'error'" :loading="waiting" :block="!waiting" :fab="waiting"
-                           @click="loading">{{valid ? 'Войти' : 'Попробовать ещё'}}
+                           :small="waiting" @click="loading">{{valid ? 'Войти' : 'Попробовать ещё'}}
                     </v-btn>
                 </v-layout>
             </v-form>
