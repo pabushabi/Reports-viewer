@@ -1,13 +1,13 @@
 <template>
-    <v-toolbar color="info" app>
+    <v-toolbar color="info" app dark>
         <v-layout id="title">
-            <v-icon color="white" large id="icon">description</v-icon>
-            <v-toolbar-title class="white--text" @click="goHome">Report viewer</v-toolbar-title>
+            <v-icon large id="icon">description</v-icon>
+            <v-toolbar-title @click="goHome">Report viewer</v-toolbar-title>
         </v-layout>
 
         <v-spacer/>
         <v-toolbar-items id="items">
-            <v-btn flat @click="goToLink" class="white--text">
+            <v-btn flat @click="goToLink">
                 {{link}}
             </v-btn>
         </v-toolbar-items>

@@ -1,7 +1,7 @@
 <template>
     <v-data-table :headers="headers" :items="table === '1' ? table1 : table === '2' ? table2 : table3"
                   class="elevation-2" hide-actions :loading="!loaded">
-        <template v-slot:items="props">
+        <template #items="props">
             <td>{{ props.item.name }}</td>
             <td>{{ props.item.jan }}</td>
             <td>{{ props.item.feb }}</td>
@@ -16,12 +16,12 @@
             <td>{{ props.item.nov }}</td>
             <td>{{ props.item.dec }}</td>
         </template>
-        <template v-slot:no-data>
+        <template #no-data>
             <v-alert :value="true" color="error" icon="warning">
                 Здесь ничего нет.
             </v-alert>
         </template>
-        <template v-slot:footer>
+        <template #footer>
             <td :colspan="headers.length">
                 Тестовая таблица #{{table}}
             </td>

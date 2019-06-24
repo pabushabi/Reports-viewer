@@ -2,7 +2,7 @@
     <v-app>
         <appheader link="home"/>
         <v-layout align-center justify-center column fill-height>
-            <v-form ref="form" id="login-form" lazy-validation class="elevation-5 pa-5 ">
+            <v-form ref="form" id="login-form" lazy-validation class="elevation-5 pa-5">
                 <h1>Вход в аккаунт</h1>
                 <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
                               :rules="[rules.required, rules.max]" v-model="login"></v-text-field>

@@ -2,11 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import login from "@/components/login";
 import home from "@/components/home";
+import apptable from "@/components/apptable";
 
 Vue.use(Router);
 
 export default new Router({
-    mode: 'history',
+    // mode: 'history',
     base: process.env.BASE_URL,
     routes: [
         {
