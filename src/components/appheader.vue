@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar color="info" app dark>
+    <v-toolbar color="light-blue darken-1" app dark>
         <v-layout id="title">
             <v-icon large id="icon">description</v-icon>
             <v-toolbar-title @click="goHome">Report viewer</v-toolbar-title>

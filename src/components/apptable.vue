@@ -1,6 +1,6 @@
 <template>
     <v-data-table :headers="headers" :items="table === '1' ? table1 : table === '2' ? table2 : table3"
-                  class="elevation-2" hide-actions :loading="!loaded">
+                  hide-actions :loading="!loaded">
         <template #items="props">
             <td>{{ props.item.name }}</td>
             <td>{{ props.item.jan }}</td>
