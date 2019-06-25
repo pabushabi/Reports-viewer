@@ -2,9 +2,9 @@
     <v-data-table :headers="headers" :items="table === '1' ? table1 : table === '2' ? table2 : table3"
                   hide-actions :loading="!loaded">
         <template #items="props">
-            <td>{{ props.item.name }}</td>
-            <td>{{ props.item.jan }}</td>
-            <td>{{ props.item.feb }}</td>
+            <td @click.stop="foo(props.item)">{{ props.item.name }}</td>
+            <td @click.stop="foo(props.item)">{{ props.item.jan }}</td>
+            <td @click.stop="foo(props.item)">{{ props.item.feb }}</td>
             <td>{{ props.item.mar }}</td>
             <td>{{ props.item.apr }}</td>
             <td>{{ props.item.may }}</td>
@@ -417,6 +417,11 @@
                         dec: 13200,
                     },
                 ]
+            }
+        },
+        methods: {
+            foo(item) {
+                console.log(`clicked on ${item.jan}`); // TODO Определить на какой ячейке (item.name, jan, feb...)
             }
         }
     }
