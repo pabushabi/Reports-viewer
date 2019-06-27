@@ -6,7 +6,7 @@
                 <h1>Вход в аккаунт</h1>
                 <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
                               :rules="[rules.required, rules.max]" v-model="login"></v-text-field>
-                <v-text-field label="Пароль" type="password"
+                <v-text-field label="Пароль" type="password" :counter="35"
                               :rules="[rules.required, rules.min]"
                               :type="show ? 'text' : 'password'"
                               :append-icon="show ? 'visibility' : 'visibility_off'" @click:append="show = !show"
@@ -19,7 +19,7 @@
                 </v-layout>
             </v-form>
         </v-layout>
-        <v-snackbar v-model="snackbar" top timeout="4000">
+        <v-snackbar v-model="snackbar" top :timeout="4000">
             {{msg}}
         </v-snackbar>
     </v-app>
@@ -27,6 +27,7 @@
 
 <script>
     import Appheader from "@/components/appheader";
+    import axios from "axios";
 
     export default {
         name: "login",
@@ -52,19 +53,37 @@
                 if (!this.$refs.form.validate()) return;
                 this.waiting = true;
 
-                setTimeout(() => {
-                    if (this.login === "pabushabi" && this.pass === "asdasd123") {
-                        this.valid = true;
-                        this.waiting = false;
-                        this.$router.push('/')
-                    } else {
-                        this.valid = false;
-                        this.waiting = false;
-                        this.msg = "Ошибка! Неправильный логин или пароль";
-                        this.snackbar = true;
-                    }
+                axios.post("http://localhost:8001/login", {"login": this.login, "password": this.pass})
+                    .then((res) => {
+                        console.log(res);
+                        if (res.data.admin === "true") {
+                            this.valid = true;
+                            this.waiting = false;
+                            this.$router.push('/admin')
+                        }
+                        if (res.data.auth === "true") {
+                            this.valid = true;
+                            this.waiting = !this.valid;
+                            this.$router.push('/')
+                        }
+                    })
+                    .catch((err) => {
+                        console.warn(err)
+                    })
 
-                }, 3000)
+                // setTimeout(() => {
+                //     if (this.login === "pabushabi" && this.pass === "asdasd123") {
+                //         this.valid = true;
+                //         this.waiting = false;
+                //         this.$router.push('/')
+                //     } else {
+                //         this.valid = false;
+                //         this.waiting = false;
+                //         this.msg = "Ошибка! Неправильный логин или пароль";
+                //         this.snackbar = true;
+                //     }
+                //
+                // }, 3000)
             }
         }
     }

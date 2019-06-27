@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import login from "@/components/login";
 import home from "@/components/home";
 import apptable from "@/components/apptable";
+import admin from "@/components/admin";
 
 Vue.use(Router);
 
@@ -19,6 +20,11 @@ export default new Router({
             path: '/login',
             name: 'login',
             component: login
+        },
+        {
+            path: '/admin',
+            name: 'adminpage',
+            component: admin
         }
     ]
 })

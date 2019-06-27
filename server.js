@@ -4,6 +4,10 @@ const helmet = require('helmet');
 // const history = require('connect-history-api-fallback');
 const app = express();
 const serveStatic = require('serve-static');
+const jsonParser = express.json();
+const session = require('cookie-session');
+const config = require('./config');
+const crypto = require('crypto');
 const xlsx = require('node-xlsx').default;
 app.use(serveStatic(__dirname + "/dist"));
 app.use(helmet());
@@ -17,12 +21,45 @@ app.use((req, res, next) => {
     next();
 });
 
-const sheet = xlsx.parse('1.xlsx');
-let { name, data } = sheet;
-console.log(sheet);
+function parsit(file) {
+    return xlsx.parse(`${file}.xlsx`)
+}
+
+const sheet = parsit('1');
 
 app.post('/', (req, res) => {
     res.send(sheet)
+});
+
+app.post('/login', jsonParser, (req, res) => {
+    let password = req.body.password;
+    let hashedPass = crypto.createHmac('sha1', config.passKey)
+        .update(password)
+        .digest('hex');
+
+    if (req.body.login === "admin" && req.body.password === "admin123") {
+        res.json({"auth": "true" ,"admin": "true"})
+    }
+    else {
+        res.json({"auth": "true","admin": "false"})
+    }
+
+    /*db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
+        .then((data) => {
+            let {pass} = data;
+            if (hashedPass === pass) {
+                req.session.message = req.body.login;
+                // res.redirect('profile');
+            }
+            else {
+                // res.render('login', {errorCode: "Неправильный логин и/или пароль!"})
+            }
+        })
+        .catch((err) => {
+            // console.log(`${getTime()} ${err}`);
+            console.warn(err);
+            // res.render('login', {errorCode: "Неправильный логин и/или пароль!"})
+        });*/
 });
 
 app.use((req, res, next) => {
