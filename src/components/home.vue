@@ -44,12 +44,17 @@
                     {id: 3, name: 'Отдел #3'}
                 ],
                 dialog : false,
+                tablet: [],
             }
         },
         beforeCreate() {
             axios.post('http://localhost:8001/')
                 .then((res) => {
-                    console.log(res)
+                    console.log(res.data);
+                    this.dept[0].name = res.data[0].name;
+                    console.log(res.data[0].data);
+                    console.log((res.data[0].data[1]));
+                    this.tablet = res.data[0].data
                 })
                 .catch((err) => {
                     console.log(err)

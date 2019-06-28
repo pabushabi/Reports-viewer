@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const app = express();
 const serveStatic = require('serve-static');
 const jsonParser = express.json();
+// const bodyParser = require('body-parser');
+// const urlencodedParcer = bodyParser.urlencoded({extended: false});
 const session = require('cookie-session');
 const config = require('./config');
 const crypto = require('crypto');
@@ -25,7 +27,14 @@ function parsit(file) {
     return xlsx.parse(`${file}.xlsx`)
 }
 
+function getRows(sheet) {
+    let rows = [];
+    for (let i = 0; i < sheet.length; i++) rows.push(sheet[i][0]);
+    return rows;
+}
+
 const sheet = parsit('1');
+console.log(sheet[0].data);
 
 app.post('/', (req, res) => {
     res.send(sheet)
@@ -60,6 +69,15 @@ app.post('/login', jsonParser, (req, res) => {
             console.warn(err);
             // res.render('login', {errorCode: "Неправильный логин и/или пароль!"})
         });*/
+});
+
+app.post('/admin', (req, res) => {
+    res.json(getRows(sheet[0].data));
+});
+
+app.post('/admin/save', jsonParser, (req, res) => {
+    console.log(req.body);
+    //saving to db or smth else
 });
 
 app.use((req, res, next) => {
