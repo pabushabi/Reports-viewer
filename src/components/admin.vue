@@ -30,6 +30,7 @@
         },
         mounted() {
             axios.post("http://localhost:8001/admin")
+            // axios.post("http://a7f511e0.ngrok.io/admin")
                 .then((res) => {
                     this.rows = res.data.splice(1, res.data.length - 1)
                 });
@@ -37,6 +38,7 @@
         methods: {
             saveData() {
                 axios.post("http://localhost:8001/admin/save", {data: this.rows})
+                // axios.post("http://a7f511e0.ngrok.io/admin/save", {data: this.rows})
                     .then((res) => {
 
                     })

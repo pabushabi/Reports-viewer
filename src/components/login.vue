@@ -54,6 +54,7 @@
                 this.waiting = true;
 
                 axios.post("http://localhost:8001/login", {"login": this.login, "password": this.pass})
+                // axios.post("http://a7f511e0.ngrok.io/login", {"login": this.login, "password": this.pass})
                     .then((res) => {
                         console.log(res);
                         if (res.data.admin === "true") {

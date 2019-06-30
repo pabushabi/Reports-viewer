@@ -9,14 +9,8 @@
                 </v-tab>
 
                 <v-tabs-items>
-                    <v-tab-item :key="1">
-                        <apptable table="1" loaded="loaded"/>
-                    </v-tab-item>
-                    <v-tab-item :key="2">
-                        <apptable table="2" loaded="loaded"/>
-                    </v-tab-item>
-                    <v-tab-item :key="3">
-                        <apptable table="3" loaded="loaded"/>
+                    <v-tab-item v-for="(dep, index) in dept" :key="index">
+                        <apptable :name="dep.name" :table="tablets[index]" loaded="loaded"/>
                     </v-tab-item>
 
                 </v-tabs-items>
@@ -38,23 +32,20 @@
             return {
                 loaded: true,
                 tab: null,
-                dept: [
-                    {id: 1, name: 'Отдел #1'},
-                    {id: 2, name: 'Отдел #2'},
-                    {id: 3, name: 'Отдел #3'}
-                ],
+                dept: [],
                 dialog : false,
-                tablet: [],
+                tablets: [[]],
             }
         },
         beforeCreate() {
             axios.post('http://localhost:8001/')
+            // axios.post('http://a7f511e0.ngrok.io/')
                 .then((res) => {
                     console.log(res.data);
-                    this.dept[0].name = res.data[0].name;
-                    console.log(res.data[0].data);
-                    console.log((res.data[0].data[1]));
-                    this.tablet = res.data[0].data
+                    for (let i = 0; i < res.data.length; i++)
+                        this.dept.push({id: i, name: res.data[i].name});
+                    for (let j = 0; j < res.data.length; j++)
+                        this.tablets[j] = res.data[j].data.splice(1, res.data[j].data.length);
                 })
                 .catch((err) => {
                     console.log(err)

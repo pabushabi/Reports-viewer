@@ -34,7 +34,8 @@ function getRows(sheet) {
 }
 
 const sheet = parsit('1');
-console.log(sheet[0].data);
+// console.log(sheet[0].data);
+// console.log(sheet[1].data);
 
 app.post('/', (req, res) => {
     res.send(sheet)
@@ -78,12 +79,6 @@ app.post('/admin', (req, res) => {
 app.post('/admin/save', jsonParser, (req, res) => {
     console.log(req.body);
     //saving to db or smth else
-});
-
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
 });
 
 const port = 8001;
