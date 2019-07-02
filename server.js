@@ -1,21 +1,17 @@
 'use strict';
 const express = require('express');
 const helmet = require('helmet');
-// const history = require('connect-history-api-fallback');
 const app = express();
+const compression = require('compression');
 const serveStatic = require('serve-static');
 const jsonParser = express.json();
-// const bodyParser = require('body-parser');
-// const urlencodedParcer = bodyParser.urlencoded({extended: false});
 const session = require('cookie-session');
 const config = require('./config');
 const crypto = require('crypto');
 const xlsx = require('node-xlsx').default;
+app.use(compression());
 app.use(serveStatic(__dirname + "/dist"));
 app.use(helmet());
-// app.use(history({
-//     verbose: true
-// }));
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -33,9 +29,21 @@ function getRows(sheet) {
     return rows;
 }
 
+function getConsolidatedReport(keys) {
+    let tmp = [['']];
+    for (let i = 0; i < sheet.length; i++)
+        for (let j = 0; j < sheet[i].data.length; j++)
+            if (keys.includes(sheet[i].data[j][0])) tmp.push(sheet[i].data[j]);
+    sheet.splice(0, 0, {
+        name: 'Сводный отчёт',
+        data: tmp
+    });
+}
+
 const sheet = parsit('1');
-// console.log(sheet[0].data);
-// console.log(sheet[1].data);
+let keys = ['к2', 'к14', 'к29', 'к30', 'один', 'два', 'и снова', 'хех'];
+
+getConsolidatedReport(keys);
 
 app.post('/', (req, res) => {
     res.send(sheet)
@@ -48,10 +56,9 @@ app.post('/login', jsonParser, (req, res) => {
         .digest('hex');
 
     if (req.body.login === "admin" && req.body.password === "admin123") {
-        res.json({"auth": "true" ,"admin": "true"})
-    }
-    else {
-        res.json({"auth": "true","admin": "false"})
+        res.json({"auth": "true", "admin": "true"})
+    } else {
+        res.json({"auth": "true", "admin": "false"})
     }
 
     /*db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
@@ -77,8 +84,9 @@ app.post('/admin', (req, res) => {
 });
 
 app.post('/admin/save', jsonParser, (req, res) => {
-    console.log(req.body);
-    //saving to db or smth else
+    // console.log(req.body);
+    if (sheet[0].name === "Сводный отчёт") sheet.splice(0, 1);
+    getConsolidatedReport(req.body.data)
 });
 
 const port = 8001;

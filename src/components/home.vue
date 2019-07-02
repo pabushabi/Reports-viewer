@@ -33,19 +33,19 @@
                 loaded: true,
                 tab: null,
                 dept: [],
-                dialog : false,
+                dialog: false,
                 tablets: [[]],
             }
         },
         beforeCreate() {
             axios.post('http://localhost:8001/')
-            // axios.post('http://a7f511e0.ngrok.io/')
+            // axios.post('http://126e4a8c.ngrok.io/')
                 .then((res) => {
                     console.log(res.data);
-                    for (let i = 0; i < res.data.length; i++)
+                    for (let i = 0; i < res.data.length; i++) {
                         this.dept.push({id: i, name: res.data[i].name});
-                    for (let j = 0; j < res.data.length; j++)
-                        this.tablets[j] = res.data[j].data.splice(1, res.data[j].data.length);
+                        this.tablets[i] = res.data[i].data.splice(1, res.data[i].data.length);
+                    }
                 })
                 .catch((err) => {
                     console.log(err)
@@ -53,7 +53,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>

@@ -1,6 +1,6 @@
 <template>
     <v-app>
-        <appheader link="home"/>
+        <appheader link="admin"/>
         <v-layout align-center justify-center column fill-height>
             <v-form ref="form" id="login-form" lazy-validation class="elevation-5 pa-5">
                 <h1>Вход в аккаунт</h1>
@@ -54,37 +54,21 @@
                 this.waiting = true;
 
                 axios.post("http://localhost:8001/login", {"login": this.login, "password": this.pass})
-                // axios.post("http://a7f511e0.ngrok.io/login", {"login": this.login, "password": this.pass})
+                // axios.post("http://126e4a8c.ngrok.io/login", {"login": this.login, "password": this.pass})
                     .then((res) => {
                         console.log(res);
-                        if (res.data.admin === "true") {
-                            this.valid = true;
-                            this.waiting = false;
-                            this.$router.push('/admin')
-                        }
                         if (res.data.auth === "true") {
                             this.valid = true;
-                            this.waiting = !this.valid;
-                            this.$router.push('/')
+                            this.waiting = false;
+                            if (res.data.admin === "true")
+                                this.$router.push('/admin');
+                            else
+                                this.$router.push('/')
                         }
                     })
                     .catch((err) => {
                         console.warn(err)
                     })
-
-                // setTimeout(() => {
-                //     if (this.login === "pabushabi" && this.pass === "asdasd123") {
-                //         this.valid = true;
-                //         this.waiting = false;
-                //         this.$router.push('/')
-                //     } else {
-                //         this.valid = false;
-                //         this.waiting = false;
-                //         this.msg = "Ошибка! Неправильный логин или пароль";
-                //         this.snackbar = true;
-                //     }
-                //
-                // }, 3000)
             }
         }
     }

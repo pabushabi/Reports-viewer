@@ -2,7 +2,21 @@
     <v-data-table :headers="headers" :items="table"
                   hide-actions :loading="!loaded">
         <template #items="props">
-            <td v-for="(item, index) in headers" @click.stop="getCell(props.item, index)">{{ props.item[index] }}</td>
+            <td v-for="(item, index) in headers" @dblclick="getCell(props.item, index)">
+<!--                <v-edit-dialog :return-value.sync="props.item.name" lazy @save="save" @cancel="cancel" @open="open"-->
+<!--                               @close="close">-->
+                    {{ props.item[index] }}
+<!--                    <template #input>-->
+<!--                        <v-text-field-->
+<!--                                v-model="props.item[index]"-->
+<!--                                :rules="[max25chars]"-->
+<!--                                label="Edit"-->
+<!--                                single-line-->
+<!--                                counter-->
+<!--                        ></v-text-field>-->
+<!--                    </template>-->
+<!--                </v-edit-dialog>-->
+            </td>
         </template>
         <template #no-data>
             <v-alert :value="true" color="error" icon="warning">
@@ -11,7 +25,7 @@
         </template>
         <template #footer>
             <td :colspan="headers.length">
-                Тестовая таблица "{{name}}"
+                Таблица "{{name}}"
             </td>
         </template>
     </v-data-table>
@@ -48,7 +62,3 @@
         }
     }
 </script>
-
-<style scoped>
-
-</style>
