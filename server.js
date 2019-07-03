@@ -60,6 +60,7 @@ app.post('/login', jsonParser, (req, res) => {
     } else {
         res.json({"auth": "true", "admin": "false"})
     }
+    // res.json({"auth": "false"})
 
     /*db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
         .then((data) => {

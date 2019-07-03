@@ -2,21 +2,18 @@
     <v-app>
         <appheader link="admin"/>
         <v-layout align-center justify-center column fill-height>
-            <v-form ref="form" id="login-form" lazy-validation class="elevation-5 pa-5">
+            <v-form ref="form" lazy-validation class="elevation-5 pa-5">
                 <h1>Вход в аккаунт</h1>
                 <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
-                              :rules="[rules.required, rules.max]" v-model="login"></v-text-field>
-                <v-text-field label="Пароль" type="password" :counter="35"
-                              :rules="[rules.required, rules.min]"
-                              :type="show ? 'text' : 'password'"
-                              :append-icon="show ? 'visibility' : 'visibility_off'" @click:append="show = !show"
+                              :rules="[rules.required, rules.max]" v-model="login" autofocus></v-text-field>
+                <v-text-field label="Пароль" type="password" :counter="20" :rules="[rules.required, rules.min, rules.max]"
+                              :type="show ? 'text' : 'password'" :append-icon="show ? 'visibility' : 'visibility_off'"
+                              @click:append="show = !show" v-on:keydown.enter="signIn"
                               v-model="pass"></v-text-field>
                 <br>
-                <v-layout align-center justify-center>
-                    <v-btn :color="valid ? 'info' : 'error'" :loading="waiting" :block="!waiting" :fab="waiting"
-                           :small="waiting" @click="loading">{{valid ? 'Войти' : 'Попробовать ещё'}}
-                    </v-btn>
-                </v-layout>
+                <v-btn :color="valid ? 'info' : 'error'" block @click="signIn" v-on:keydown.enter="signIn">
+                    {{valid ? 'Войти' : 'Попробовать снова'}}
+                </v-btn>
             </v-form>
         </v-layout>
         <v-snackbar v-model="snackbar" top :timeout="4000">
@@ -42,14 +39,13 @@
                 show: false,
                 login: "",
                 pass: "",
-                waiting: false,
                 valid: true,
                 snackbar: false,
                 msg: "",
             }
         },
         methods: {
-            loading() {
+            signIn() {
                 if (!this.$refs.form.validate()) return;
                 this.waiting = true;
 
@@ -59,23 +55,23 @@
                         console.log(res);
                         if (res.data.auth === "true") {
                             this.valid = true;
-                            this.waiting = false;
                             if (res.data.admin === "true")
                                 this.$router.push('/admin');
                             else
                                 this.$router.push('/')
                         }
+                        this.msg = "Неправильный логин или пароль! Повторите попытку";
+                        this.snackbar = true;
+                        this.valid = false;
                     })
                     .catch((err) => {
-                        console.warn(err)
+                        console.warn(err);
+                        this.msg = "Что-то пошло не так, повторите попытку";
+                        this.snackbar = true;
+                        this.valid = false;
                     })
             }
         }
     }
 </script>
 
-<style scoped>
-    #login-form {
-        margin-bottom: 7%;
-    }
-</style>
