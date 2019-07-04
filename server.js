@@ -87,7 +87,13 @@ app.post('/admin', (req, res) => {
 app.post('/admin/save', jsonParser, (req, res) => {
     // console.log(req.body);
     if (sheet[0].name === "Сводный отчёт") sheet.splice(0, 1);
-    getConsolidatedReport(req.body.data)
+    getConsolidatedReport(req.body.data);
+    res.json({"saved": "true"})
+});
+
+app.post('/admin/newuser', jsonParser, (req, res) => {
+    console.log(req.body);
+    res.json({"userAdded": "true"})
 });
 
 const port = 8001;

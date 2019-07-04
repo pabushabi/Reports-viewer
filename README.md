@@ -7,14 +7,16 @@ Stack of the tools:
 * Vue.js
   * Vuetify
   * Vue-router
-* Node.js (Django (maybe))
-* Maybe another tool that can help with parsing .xlsx and Google tables 
+* Node.js
+* Maybe another tool that can help with parsing Google tables 
 * Maybe another useful plugin for Vue (like Vuex)
 
 ## Home page
 ![home page](/docs/images/RV-home.jpg "Home Page")
 ## Login page
 ![login page](/docs/images/RV-login.jpg "Login Page")
+## 404 page
+![404 page](/docs/images/RV-404.jpg "404 Page")
 
 
 ## Project setup
@@ -32,15 +34,7 @@ npm run serve
 npm run build
 ```
 
-### Run your tests
+### Starts Node server
 ```
-npm run test
+node server.js
 ```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -1,6 +1,6 @@
 <template>
     <v-app>
-        <appheader/>
+        <appheader link="404"/>
         <h1 class="text-xs-center mt-5 pt-5">Панель Администратора</h1>
         <v-layout justify-center row fill-height>
             <v-dialog v-model="openKrits" max-width="600px">
@@ -48,7 +48,7 @@
                         <v-container grid-list-md>
                             <v-form ref="form" lazy-validation>
                                 <v-layout wrap>
-                                    <v-text-field label="Логин" type="text" :counter="20" clearable
+                                    <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
                                                   :rules="[rules.max, rules.required]"
                                                   v-model="newUser.login" class="ma-2"></v-text-field>
                                     <v-text-field label="Пароль" type="text" :counter="20" clearable
@@ -69,6 +69,9 @@
             </v-dialog>
             <br/>
         </v-layout>
+        <v-snackbar v-model="snackbar" top :timeout="4000">
+            {{msg}}
+        </v-snackbar>
     </v-app>
 </template>
 
@@ -83,13 +86,15 @@
             return {
                 rules: {
                     required: value => !!value || 'Должно быть заполнено',
-                    max: e => e.length <= 20 || 'Максимум 20 символов'
+                    max: e => (e && e.length <= 20) || 'Максимум 20 символов'
                 },
                 rows: [],
                 newUser: {login: "", pass: "", role: "Стандарт"},
                 openKrits: false,
                 openUsers: false,
                 openNewUser: false,
+                snackbar: false,
+                msg: "",
             }
         },
         methods: {
@@ -97,13 +102,17 @@
                 this.openKrits = false;
                 axios.post("http://localhost:8001/admin/save", {data: this.rows})
                 // axios.post("http://126e4a8c.ngrok.io/admin/save", {data: this.rows})
-                    .then((res) => {
+                    .then(res => {
+                        if (res.data.saved !== "true") return;
+                        this.msg = "Сохранено!";
+                        this.snackbar = true;
+                        console.log(res.data)
                     })
             },
             getKrits() {
                 axios.post("http://localhost:8001/admin")
                 // axios.post("http://126e4a8c.ngrok.io/admin")
-                    .then((res) => {
+                    .then(res => {
                         this.rows = res.data.splice(1, res.data.length - 1)
                     });
             },
@@ -115,7 +124,13 @@
             sendNewUser() {
                 if (!this.$refs.form.validate()) return;
                 this.openNewUser = false;
-                console.log(this.newUser) //TODO: send new user to server
+                axios.post("http://localhost:8001/admin/newuser", this.newUser)
+                    .then(res => {
+                        if (res.data.userAdded !== "true") return;
+                        this.msg = "Пользователь добавлен";
+                        this.snackbar = true;
+                        console.log(res)
+                    });
             }
         }
     }

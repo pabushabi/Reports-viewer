@@ -4,9 +4,9 @@
         <v-layout align-center justify-center column fill-height>
             <v-form ref="form" lazy-validation class="elevation-5 pa-5">
                 <h1>Вход в аккаунт</h1>
-                <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
+                <v-text-field label="Имя пользователя" type="text" counter="20" clearable
                               :rules="[rules.required, rules.max]" v-model="login" autofocus></v-text-field>
-                <v-text-field label="Пароль" type="password" :counter="20" :rules="[rules.required, rules.min, rules.max]"
+                <v-text-field label="Пароль" type="password" counter="20" :rules="[rules.required, rules.min, rules.max]"
                               :type="show ? 'text' : 'password'" :append-icon="show ? 'visibility' : 'visibility_off'"
                               @click:append="show = !show" v-on:keydown.enter="signIn"
                               v-model="pass"></v-text-field>
@@ -34,7 +34,7 @@
                 rules: {
                     required: value => !!value || 'Должно быть заполнено',
                     min: v => v.length >= 8 || 'Минимум 8 символов',
-                    max: e => e.length <= 20 || 'Максимум 20 символов'
+                    max: e => (e && e.length <= 20) || 'Максимум 20 символов'
                 },
                 show: false,
                 login: "",
