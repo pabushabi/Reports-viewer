@@ -15,8 +15,8 @@
                         <v-container grid-list-md>
                             <v-layout wrap>
                                 <v-text-field v-for="(krit, index) in rows" :label="'Строка #'+ (index + 1) + ':'"
-                                              type="text" :counter="40" clearable :rules="[rules.max]"
-                                              v-model="rows[index]" class="ma-2" :ref="index"></v-text-field>
+                                              type="text" :counter="20" clearable :rules="[rules.max]"
+                                              v-model="rows[index]" class="ma-2" ref="myref"></v-text-field>
                             </v-layout>
                         </v-container>
                         <small>Чтобы удалить, оставьте пустым</small>
@@ -52,7 +52,7 @@
                                                   :rules="[rules.max, rules.required]"
                                                   v-model="newUser.login" class="ma-2"></v-text-field>
                                     <v-text-field label="Пароль" type="text" :counter="20" clearable
-                                                  :rules="[rules.max, rules.required]"
+                                                  :rules="[rules.min, rules.max, rules.required]"
                                                   v-model="newUser.pass" class="ma-2"></v-text-field>
                                     <v-select label="Роль" :items="['Стандарт', 'Начальник', 'Ген. начальник', 'Админ']"
                                               v-model="newUser.role" class="ma-2"></v-select>
@@ -78,6 +78,7 @@
 <script>
     import Appheader from "@/components/appheader";
     import axios from "axios";
+    import Vue from "vue"
 
     export default {
         name: "admin",
@@ -86,9 +87,11 @@
             return {
                 rules: {
                     required: value => !!value || 'Должно быть заполнено',
-                    max: e => (e && e.length <= 20) || 'Максимум 20 символов'
+                    max: e => (e && e.length <= 20) || 'Максимум 20 символов',
+                    min: e => e.length >= 8 || 'Минимум 8 символов'
                 },
                 rows: [],
+                roles: [],
                 newUser: {login: "", pass: "", role: "Стандарт"},
                 openKrits: false,
                 openUsers: false,
@@ -118,8 +121,9 @@
             },
             addKrit() {
                 this.rows.push("");
-                // let tmp = this.rows.length - 1;
-                // this.$refs..focus(); //TODO: set focus at new input
+                Vue.nextTick(() => {
+                    this.$refs.myref[this.rows.length - 1].focus(); //TODO: set focus at new input
+                });
             },
             sendNewUser() {
                 if (!this.$refs.form.validate()) return;

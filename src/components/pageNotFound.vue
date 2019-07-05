@@ -16,7 +16,3 @@
         components: {Appheader}
     }
 </script>
-
-<style scoped>
-
-</style>

@@ -16,7 +16,8 @@
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vuetify": "^1.5.16",
-    "compression": "^1.7.4"
+    "compression": "^1.7.4",
+    "pg-promise": "^8.7.2"
   },
   "devDependencies": {
     "@vue/cli-service": "^3.8.4",

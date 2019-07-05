@@ -41,7 +41,8 @@
             axios.post('http://localhost:8001/')
             // axios.post('http://126e4a8c.ngrok.io/')
                 .then((res) => {
-                    console.log(res.data);
+                    if (res.data[res.data.length - 1].user === undefined) this.$router.push('/login');
+                    res.data.splice(res.data.length - 1, res.data.length);
                     for (let i = 0; i < res.data.length; i++) {
                         this.dept.push({id: i, name: res.data[i].name});
                         this.tablets[i] = res.data[i].data.splice(1, res.data[i].data.length);

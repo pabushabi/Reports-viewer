@@ -9,9 +9,21 @@ const session = require('cookie-session');
 const config = require('./config');
 const crypto = require('crypto');
 const xlsx = require('node-xlsx').default;
+const pgp = require('pg-promise')();
+const db = pgp(config.path);
 app.use(compression());
 app.use(serveStatic(__dirname + "/dist"));
 app.use(helmet());
+
+app.use(session({
+    name: 'session',
+    keys: [config.cookieKey1, config.cookieKey2],
+    cookie: {
+        secure: true,
+        path: '/'
+    },
+    maxAge: 24 * 60 * 60 * 1000
+}));
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -31,9 +43,11 @@ function getRows(sheet) {
 
 function getConsolidatedReport(keys) {
     let tmp = [['']];
-    for (let i = 0; i < sheet.length; i++)
-        for (let j = 0; j < sheet[i].data.length; j++)
-            if (keys.includes(sheet[i].data[j][0])) tmp.push(sheet[i].data[j]);
+    if (sheet[sheet.length - 1].user !== undefined)
+        sheet.splice(sheet.length - 1, 1);
+        for (let i = 0; i < sheet.length; i++)
+            for (let j = 0; j < sheet[i].data.length; j++)
+                if (keys.includes(sheet[i].data[j][0])) tmp.push(sheet[i].data[j]);
     sheet.splice(0, 0, {
         name: 'Сводный отчёт',
         data: tmp
@@ -46,6 +60,9 @@ let keys = ['к2', 'к14', 'к29', 'к30', 'один', 'два', 'и снова'
 getConsolidatedReport(keys);
 
 app.post('/', (req, res) => {
+    if (sheet[sheet.length - 1].user === undefined)
+        sheet.push({user: req.session.message});
+    else sheet[sheet.length - 1] = {user: req.session.message};
     res.send(sheet)
 });
 
@@ -55,29 +72,18 @@ app.post('/login', jsonParser, (req, res) => {
         .update(password)
         .digest('hex');
 
-    if (req.body.login === "admin" && req.body.password === "admin123") {
-        res.json({"auth": "true", "admin": "true"})
-    } else {
-        res.json({"auth": "true", "admin": "false"})
-    }
-    // res.json({"auth": "false"})
-
-    /*db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
-        .then((data) => {
+    console.log(req.body);
+    db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
+        .then(data => {
             let {pass} = data;
             if (hashedPass === pass) {
                 req.session.message = req.body.login;
-                // res.redirect('profile');
-            }
-            else {
-                // res.render('login', {errorCode: "Неправильный логин и/или пароль!"})
+                res.json({"auth": "true", "user": req.body.login})
             }
         })
-        .catch((err) => {
-            // console.log(`${getTime()} ${err}`);
-            console.warn(err);
-            // res.render('login', {errorCode: "Неправильный логин и/или пароль!"})
-        });*/
+        .catch(err => {
+            res.json({"auth": "false"})
+        })
 });
 
 app.post('/admin', (req, res) => {
@@ -92,8 +98,19 @@ app.post('/admin/save', jsonParser, (req, res) => {
 });
 
 app.post('/admin/newuser', jsonParser, (req, res) => {
-    console.log(req.body);
-    res.json({"userAdded": "true"})
+    let password = req.body.pass;
+    let hashedPass = crypto.createHmac('sha1', config.passKey)
+        .update(password)
+        .digest('hex');
+    // console.log(req.body);
+
+    db.none("INSERT INTO accounts VALUES ($1, $2, $3)", [req.body.login, hashedPass, req.body.role])
+        .then(() => {
+            res.json({"userAdded": "true"})
+        })
+        .catch(err => {
+            console.log(err)
+        });
 });
 
 const port = 8001;
