@@ -6,7 +6,8 @@
                 <h1>Вход в аккаунт</h1>
                 <v-text-field label="Имя пользователя" type="text" counter="20" clearable
                               :rules="[rules.required, rules.max]" v-model="login" autofocus></v-text-field>
-                <v-text-field label="Пароль" type="password" counter="20" :rules="[rules.required, rules.min, rules.max]"
+                <v-text-field label="Пароль" type="password" counter="20"
+                              :rules="[rules.required, rules.min, rules.max]"
                               :type="show ? 'text' : 'password'" :append-icon="show ? 'visibility' : 'visibility_off'"
                               @click:append="show = !show" v-on:keydown.enter="signIn"
                               v-model="pass"></v-text-field>
@@ -53,9 +54,9 @@
                 // axios.post("http://126e4a8c.ngrok.io/login", {"login": this.login, "password": this.pass})
                     .then((res) => {
                         console.log(res);
-                        if (res.data.auth === "true") {
+                        if (res.data.auth === true) {
                             this.valid = true;
-                            if (res.data.admin === "true")
+                            if (res.data.admin === true)
                                 this.$router.push('/admin');
                             else
                                 this.$router.push('/')

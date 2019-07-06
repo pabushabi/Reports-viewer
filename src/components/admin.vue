@@ -106,14 +106,14 @@
                 axios.post("http://localhost:8001/admin/save", {data: this.rows})
                 // axios.post("http://126e4a8c.ngrok.io/admin/save", {data: this.rows})
                     .then(res => {
-                        if (res.data.saved !== "true") return;
+                        if (res.data.saved !== true) return;
                         this.msg = "Сохранено!";
                         this.snackbar = true;
                         console.log(res.data)
                     })
             },
             getKrits() {
-                axios.post("http://localhost:8001/admin")
+                axios.post("http://localhost:8001/admin/getkrits")
                 // axios.post("http://126e4a8c.ngrok.io/admin")
                     .then(res => {
                         this.rows = res.data.splice(1, res.data.length - 1)
@@ -130,12 +130,21 @@
                 this.openNewUser = false;
                 axios.post("http://localhost:8001/admin/newuser", this.newUser)
                     .then(res => {
-                        if (res.data.userAdded !== "true") return;
+                        if (res.data.userAdded !== true) return;
                         this.msg = "Пользователь добавлен";
                         this.snackbar = true;
                         console.log(res)
                     });
             }
+        },
+        beforeCreate() {
+            axios.post("http://localhost:8001/admin")
+                .then(res => {
+                    if (res.data.admin !== "true") this.$router.push("/404");
+                })
+                .catch(err => {
+                    console.log(err)
+                })
         }
     }
 </script>

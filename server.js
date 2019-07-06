@@ -45,9 +45,9 @@ function getConsolidatedReport(keys) {
     let tmp = [['']];
     if (sheet[sheet.length - 1].user !== undefined)
         sheet.splice(sheet.length - 1, 1);
-        for (let i = 0; i < sheet.length; i++)
-            for (let j = 0; j < sheet[i].data.length; j++)
-                if (keys.includes(sheet[i].data[j][0])) tmp.push(sheet[i].data[j]);
+    for (let i = 0; i < sheet.length; i++)
+        for (let j = 0; j < sheet[i].data.length; j++)
+            if (keys.includes(sheet[i].data[j][0])) tmp.push(sheet[i].data[j]);
     sheet.splice(0, 0, {
         name: 'Сводный отчёт',
         data: tmp
@@ -78,7 +78,7 @@ app.post('/login', jsonParser, (req, res) => {
             let {pass} = data;
             if (hashedPass === pass) {
                 req.session.message = req.body.login;
-                res.json({"auth": "true", "user": req.body.login})
+                res.json({"auth": true, "user": req.body.login})
             }
         })
         .catch(err => {
@@ -87,6 +87,20 @@ app.post('/login', jsonParser, (req, res) => {
 });
 
 app.post('/admin', (req, res) => {
+    if (req.session.message !== undefined)
+        db.one("SELECT userrole FROM accounts WHERE login = $1", [req.session.message])
+            .then(result => {
+                if (result.userrole === "Админ") {
+                    res.json({"admin": "true"});
+                } else res.json({"admin": false})
+            })
+            .catch(err => {
+                console.log(err)
+            });
+    else res.json({"admin": false})
+});
+
+app.post('/admin/getkrits', (req, res) => {
     res.json(getRows(sheet[0].data));
 });
 
@@ -94,7 +108,7 @@ app.post('/admin/save', jsonParser, (req, res) => {
     // console.log(req.body);
     if (sheet[0].name === "Сводный отчёт") sheet.splice(0, 1);
     getConsolidatedReport(req.body.data);
-    res.json({"saved": "true"})
+    res.json({"saved": true})
 });
 
 app.post('/admin/newuser', jsonParser, (req, res) => {
@@ -106,7 +120,7 @@ app.post('/admin/newuser', jsonParser, (req, res) => {
 
     db.none("INSERT INTO accounts VALUES ($1, $2, $3)", [req.body.login, hashedPass, req.body.role])
         .then(() => {
-            res.json({"userAdded": "true"})
+            res.json({"userAdded": true})
         })
         .catch(err => {
             console.log(err)
