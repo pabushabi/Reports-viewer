@@ -49,11 +49,8 @@
             signIn() {
                 if (!this.$refs.form.validate()) return;
                 this.waiting = true;
-
-                axios.post("http://localhost:8001/login", {"login": this.login, "password": this.pass})
-                // axios.post("http://126e4a8c.ngrok.io/login", {"login": this.login, "password": this.pass})
+                axios.post("/login", {"login": this.login, "password": this.pass})
                     .then((res) => {
-                        console.log(res);
                         if (res.data.auth === true) {
                             this.valid = true;
                             if (res.data.admin === true)

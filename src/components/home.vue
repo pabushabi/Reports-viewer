@@ -1,18 +1,16 @@
 <template>
     <v-app>
         <appheader link="login"/>
-        <h1 class="text-xs-center mt-5 pt-5">Просмотр таблиц</h1>
-        <v-layout align-center column justify-center>
-            <v-tabs color="light-blue darken-1" slider-color="amber" dark class="elevation-3">
+<!--        <h1 class="text-xs-center mt-5 pt-5">Просмотр таблиц</h1>-->
+        <v-layout column justify-center class="mt-5">
+            <v-tabs color="light-blue darken-1" slider-color="amber" dark class="elevation-3 mt-4">
                 <v-tab v-for="item in dept" :key="item.id">
                     {{ item.name }}
                 </v-tab>
-
                 <v-tabs-items>
                     <v-tab-item v-for="(dep, index) in dept" :key="index">
                         <apptable :name="dep.name" :table="tablets[index]" loaded="loaded"/>
                     </v-tab-item>
-
                 </v-tabs-items>
             </v-tabs>
         </v-layout>
@@ -38,8 +36,7 @@
             }
         },
         beforeCreate() {
-            axios.post('http://localhost:8001/')
-            // axios.post('http://126e4a8c.ngrok.io/')
+            axios.post('/')
                 .then((res) => {
                     if (res.data[res.data.length - 1].user === undefined) this.$router.push('/login');
                     res.data.splice(res.data.length - 1, res.data.length);

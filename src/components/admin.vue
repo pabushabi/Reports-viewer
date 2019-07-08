@@ -16,7 +16,8 @@
                             <v-layout wrap>
                                 <v-text-field v-for="(krit, index) in rows" :label="'Строка #'+ (index + 1) + ':'"
                                               type="text" :counter="20" clearable :rules="[rules.max]"
-                                              v-model="rows[index]" class="ma-2" ref="myref"></v-text-field>
+                                              v-model="rows[index]" class="ma-2" ref="myref"
+                                              @keydown.enter="sendData"></v-text-field>
                             </v-layout>
                         </v-container>
                         <small>Чтобы удалить, оставьте пустым</small>
@@ -34,11 +35,39 @@
 
             <v-btn color="info">????</v-btn>
 
-            <v-btn color="info">показать пользователей</v-btn>
+            <v-dialog v-model="openUsers" max-width="600px">
+                <template #activator="{ on }">
+                    <v-btn color="info" v-on="on" @click="getUsers">показать пользователей</v-btn>
+                </template>
+                <v-card>
+                    <v-card-title>
+                        <span class="headline">Список пользователей</span>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-container grid-list-md>
+                            <v-layout wrap>
+                                <v-layout v-for="(item, index) in users">
+                                    <v-text-field :label="'Пользователь #'+ (index + 1) + ':'"
+                                                  type="text" :counter="20" clearable :rules="[rules.max]"
+                                                  v-model="users[index].login" class="ma-2" ref="myref"></v-text-field>
+                                    <v-select label="Роль"
+                                              :items="userRoles"
+                                              v-model="users[index].userrole" class="ma-2"></v-select>
+                                </v-layout>
+                            </v-layout>
+                        </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat @click="openUsers = false">Отменить</v-btn>
+                        <v-btn color="blue darken-1" flat @click="sendUsers">Сохранить</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
 
             <v-dialog v-model="openNewUser" max-width="600px">
                 <template #activator="{ on }">
-                    <v-btn color="info" v-on="on">добавить пользователя</v-btn>
+                    <v-btn color="info" v-on="on" @click="getRoles">добавить пользователя</v-btn>
                 </template>
                 <v-card>
                     <v-card-title>
@@ -47,16 +76,18 @@
                     <v-card-text>
                         <v-container grid-list-md>
                             <v-form ref="form" lazy-validation>
-                                <v-layout wrap>
-                                    <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
-                                                  :rules="[rules.max, rules.required]"
-                                                  v-model="newUser.login" class="ma-2"></v-text-field>
-                                    <v-text-field label="Пароль" type="text" :counter="20" clearable
-                                                  :rules="[rules.min, rules.max, rules.required]"
-                                                  v-model="newUser.pass" class="ma-2"></v-text-field>
-                                    <v-select label="Роль" :items="['Стандарт', 'Начальник', 'Ген. начальник', 'Админ']"
-                                              v-model="newUser.role" class="ma-2"></v-select>
-                                </v-layout>
+                                <keep-alive>
+                                    <v-layout wrap>
+                                        <v-text-field label="Имя пользователя" type="text" :counter="20" clearable
+                                                      :rules="[rules.max, rules.required]"
+                                                      v-model="newUser.login" class="ma-2"></v-text-field>
+                                        <v-text-field label="Пароль" type="text" :counter="20" clearable
+                                                      :rules="[rules.min, rules.max, rules.required]"
+                                                      v-model="newUser.pass" class="ma-2"></v-text-field>
+                                        <v-select label="Роль" :items="userRoles" v-model="newUser.role"
+                                                  class="ma-2"></v-select>
+                                    </v-layout>
+                                </keep-alive>
                             </v-form>
                         </v-container>
                     </v-card-text>
@@ -92,10 +123,12 @@
                 },
                 rows: [],
                 roles: [],
+                users: [],
                 newUser: {login: "", pass: "", role: "Стандарт"},
                 openKrits: false,
                 openUsers: false,
                 openNewUser: false,
+                userRoles: [],
                 snackbar: false,
                 msg: "",
             }
@@ -103,42 +136,53 @@
         methods: {
             sendData() {
                 this.openKrits = false;
-                axios.post("http://localhost:8001/admin/save", {data: this.rows})
-                // axios.post("http://126e4a8c.ngrok.io/admin/save", {data: this.rows})
+                axios.post("/admin/save", {data: this.rows})
                     .then(res => {
                         if (res.data.saved !== true) return;
                         this.msg = "Сохранено!";
                         this.snackbar = true;
-                        console.log(res.data)
                     })
             },
             getKrits() {
-                axios.post("http://localhost:8001/admin/getkrits")
-                // axios.post("http://126e4a8c.ngrok.io/admin")
+                axios.post("/admin/getkrits")
                     .then(res => {
                         this.rows = res.data.splice(1, res.data.length - 1)
                     });
             },
+            getRoles() {
+                axios.post("/admin/getroles")
+                    .then(res => {
+                        this.userRoles = res.data;
+                    })
+            },
+            getUsers() {
+                this.getRoles();
+                axios.post("/admin/getusers")
+                    .then(res => {
+                        console.log(res);
+                        this.users = res.data;
+                        console.log(this.users)
+                    })
+            },
             addKrit() {
                 this.rows.push("");
                 Vue.nextTick(() => {
-                    this.$refs.myref[this.rows.length - 1].focus(); //TODO: set focus at new input
+                    this.$refs.myref[this.rows.length - 1].focus();
                 });
             },
             sendNewUser() {
                 if (!this.$refs.form.validate()) return;
                 this.openNewUser = false;
-                axios.post("http://localhost:8001/admin/newuser", this.newUser)
+                axios.post("/admin/newuser", this.newUser)
                     .then(res => {
                         if (res.data.userAdded !== true) return;
                         this.msg = "Пользователь добавлен";
                         this.snackbar = true;
-                        console.log(res)
                     });
             }
         },
         beforeCreate() {
-            axios.post("http://localhost:8001/admin")
+            axios.post("/admin")
                 .then(res => {
                     if (res.data.admin !== "true") this.$router.push("/404");
                 })

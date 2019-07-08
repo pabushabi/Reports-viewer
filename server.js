@@ -54,8 +54,9 @@ function getConsolidatedReport(keys) {
     });
 }
 
-const sheet = parsit('1');
-let keys = ['к2', 'к14', 'к29', 'к30', 'один', 'два', 'и снова', 'хех'];
+const sheet = parsit('3-1');
+let keys = [''];
+let userRoles = ['Стандарт', 'Начальник', 'Ген. начальник', 'Админ'];
 
 getConsolidatedReport(keys);
 
@@ -100,12 +101,25 @@ app.post('/admin', (req, res) => {
     else res.json({"admin": false})
 });
 
+app.post('/admin/getroles', (req, res) => {
+    res.json(userRoles);
+});
+
 app.post('/admin/getkrits', (req, res) => {
     res.json(getRows(sheet[0].data));
 });
 
+app.post('/admin/getusers', (req, res) => {
+    db.any("SELECT login, userrole FROM accounts")
+        .then(r => {
+            res.json(r)
+        })
+        .catch(err => {
+            console.log(err)
+        })
+});
+
 app.post('/admin/save', jsonParser, (req, res) => {
-    // console.log(req.body);
     if (sheet[0].name === "Сводный отчёт") sheet.splice(0, 1);
     getConsolidatedReport(req.body.data);
     res.json({"saved": true})
@@ -116,7 +130,6 @@ app.post('/admin/newuser', jsonParser, (req, res) => {
     let hashedPass = crypto.createHmac('sha1', config.passKey)
         .update(password)
         .digest('hex');
-    // console.log(req.body);
 
     db.none("INSERT INTO accounts VALUES ($1, $2, $3)", [req.body.login, hashedPass, req.body.role])
         .then(() => {
