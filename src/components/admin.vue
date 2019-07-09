@@ -33,8 +33,6 @@
                 </v-card>
             </v-dialog>
 
-            <v-btn color="info">????</v-btn>
-
             <v-dialog v-model="openUsers" max-width="600px">
                 <template #activator="{ on }">
                     <v-btn color="info" v-on="on" @click="getUsers">показать пользователей</v-btn>
@@ -144,24 +142,22 @@
                     })
             },
             getKrits() {
-                axios.post("/admin/getkrits")
+                axios.get("/admin/krits")
                     .then(res => {
                         this.rows = res.data.splice(1, res.data.length - 1)
                     });
             },
             getRoles() {
-                axios.post("/admin/getroles")
+                axios.get("/admin/roles")
                     .then(res => {
                         this.userRoles = res.data;
                     })
             },
             getUsers() {
                 this.getRoles();
-                axios.post("/admin/getusers")
+                axios.get("/admin/users")
                     .then(res => {
-                        console.log(res);
                         this.users = res.data;
-                        console.log(this.users)
                     })
             },
             addKrit() {
@@ -182,13 +178,8 @@
             }
         },
         beforeCreate() {
-            axios.post("/admin")
-                .then(res => {
-                    if (res.data.admin !== "true") this.$router.push("/404");
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+            if (localStorage.getItem('admin') !== 'true' || localStorage.getItem('auth' !== 'true'))
+                this.$router.push("/404");
         }
     }
 </script>

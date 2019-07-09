@@ -5,29 +5,19 @@ const app = express();
 const compression = require('compression');
 const serveStatic = require('serve-static');
 const jsonParser = express.json();
-const session = require('cookie-session');
 const config = require('./config');
 const crypto = require('crypto');
 const xlsx = require('node-xlsx').default;
 const pgp = require('pg-promise')();
 const db = pgp(config.path);
+const jwt = require('jsonwebtoken');
 app.use(compression());
 app.use(serveStatic(__dirname + "/dist"));
 app.use(helmet());
 
-app.use(session({
-    name: 'session',
-    keys: [config.cookieKey1, config.cookieKey2],
-    cookie: {
-        secure: true,
-        path: '/'
-    },
-    maxAge: 24 * 60 * 60 * 1000
-}));
-
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
     next();
 });
 
@@ -54,17 +44,13 @@ function getConsolidatedReport(keys) {
     });
 }
 
-const sheet = parsit('3-1');
-let keys = [''];
-let userRoles = ['Стандарт', 'Начальник', 'Ген. начальник', 'Админ'];
-
-getConsolidatedReport(keys);
+const sheet = parsit(config.file);
+let userRoles = config.roles;
+getConsolidatedReport(config.keys);
 
 app.post('/', (req, res) => {
-    if (sheet[sheet.length - 1].user === undefined)
-        sheet.push({user: req.session.message});
-    else sheet[sheet.length - 1] = {user: req.session.message};
-    res.send(sheet)
+    console.log(req.headers);
+    res.json(sheet)
 });
 
 app.post('/login', jsonParser, (req, res) => {
@@ -74,42 +60,28 @@ app.post('/login', jsonParser, (req, res) => {
         .digest('hex');
 
     console.log(req.body);
-    db.one("SELECT pass FROM accounts WHERE login = $1", req.body.login)
-        .then(data => {
-            let {pass} = data;
-            if (hashedPass === pass) {
-                req.session.message = req.body.login;
-                res.json({"auth": true, "user": req.body.login})
-            }
+    db.one("SELECT pass, userrole FROM accounts WHERE login = $1", req.body.login)
+        .then(async data => {
+            let {pass, userrole} = data;
+            let isAuth = hashedPass === pass;
+            let isAdmin = userrole === 'Админ';
+            let token = jwt.sign({login: req.body.login, role: userrole}, config.passKey, {expiresIn: '12h'});
+            res.json({"auth": isAuth, "admin": isAdmin, "token": token})
         })
         .catch(err => {
-            res.json({"auth": "false"})
+            res.json({"auth": false})
         })
 });
 
-app.post('/admin', (req, res) => {
-    if (req.session.message !== undefined)
-        db.one("SELECT userrole FROM accounts WHERE login = $1", [req.session.message])
-            .then(result => {
-                if (result.userrole === "Админ") {
-                    res.json({"admin": "true"});
-                } else res.json({"admin": false})
-            })
-            .catch(err => {
-                console.log(err)
-            });
-    else res.json({"admin": false})
-});
-
-app.post('/admin/getroles', (req, res) => {
+app.get('/admin/roles', (req, res) => {
     res.json(userRoles);
 });
 
-app.post('/admin/getkrits', (req, res) => {
+app.get('/admin/krits', (req, res) => {
     res.json(getRows(sheet[0].data));
 });
 
-app.post('/admin/getusers', (req, res) => {
+app.get('/admin/users', (req, res) => {
     db.any("SELECT login, userrole FROM accounts")
         .then(r => {
             res.json(r)
@@ -140,7 +112,6 @@ app.post('/admin/newuser', jsonParser, (req, res) => {
         });
 });
 
-const port = 8001;
-app.listen(port, () => {
-    console.log(`Server running at http://127.0.0.1:${port} (http://localhost:${port})`);
+app.listen(config.port, () => {
+    console.log(`Server running at http://127.0.0.1:${config.port} (http://localhost:${config.port})`);
 });

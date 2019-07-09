@@ -26,6 +26,7 @@
 <script>
     import Appheader from "@/components/appheader";
     import axios from "axios";
+    axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
     export default {
         name: "login",
@@ -48,13 +49,16 @@
         methods: {
             signIn() {
                 if (!this.$refs.form.validate()) return;
-                this.waiting = true;
                 axios.post("/login", {"login": this.login, "password": this.pass})
                     .then((res) => {
                         if (res.data.auth === true) {
                             this.valid = true;
-                            if (res.data.admin === true)
+                            localStorage.setItem('auth', 'true');
+                            localStorage.setItem('token', res.data.token);
+                            if (res.data.admin === true) {
+                                localStorage.setItem('admin', 'true');
                                 this.$router.push('/admin');
+                            }
                             else
                                 this.$router.push('/')
                         }
@@ -69,6 +73,9 @@
                         this.valid = false;
                     })
             }
+        },
+        beforeCreate() {
+            if (localStorage.getItem('auth') === 'true') this.$router.push('/')
         }
     }
 </script>
