@@ -1,6 +1,6 @@
 <template>
     <v-app>
-        <appheader link="admin"/>
+        <appheader link=""/>
         <v-layout align-center justify-center column fill-height>
             <v-form ref="form" lazy-validation class="elevation-5 pa-5">
                 <h1>Вход в аккаунт</h1>

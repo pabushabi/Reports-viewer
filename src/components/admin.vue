@@ -13,9 +13,10 @@
                     </v-card-title>
                     <v-card-text>
                         <v-container grid-list-md>
+                            <v-select label="Отчёт" :items="reports" v-model="rep" class="ma-1"></v-select>
                             <v-layout wrap>
                                 <v-text-field v-for="(krit, index) in rows" :label="'Строка #'+ (index + 1) + ':'"
-                                              type="text" :counter="20" clearable :rules="[rules.max]"
+                                              type="text" :counter="100" clearable
                                               v-model="rows[index]" class="ma-2" ref="myref"
                                               @keydown.enter="sendData"></v-text-field>
                             </v-layout>
@@ -23,12 +24,35 @@
                         <small>Чтобы удалить, оставьте пустым</small>
                     </v-card-text>
                     <v-card-actions>
-                        <v-btn color="green" flat @click="addKrit">
+                        <v-btn color="green" flat @click="addCriteria">
                             <v-icon dark>add</v-icon>
                         </v-btn>
                         <v-spacer></v-spacer>
                         <v-btn color="red darken-1" flat @click="openKrits = false">Отменить</v-btn>
                         <v-btn color="blue darken-1" flat @click="sendData">Сохранить</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+
+            <v-dialog v-model="openConfig" max-width="600px">
+                <template #activator="{ on }">
+                    <v-btn color="info" v-on="on" @click="getConfig">показать config</v-btn>
+                </template>
+                <v-card>
+                    <v-card-title>
+                        <span class="headline">Конфигурационный файл</span>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-container grid-list-md>
+                                <v-textarea v-model="config.depts" auto-grow label="depts" rows="1"></v-textarea>
+                                <v-textarea v-model="config.keys" auto-grow label="keys" rows="1"></v-textarea>
+                                <v-textarea v-model="config.roles" auto-grow label="roles" rows="1"></v-textarea>
+                        </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn color="red darken-1" flat @click="openConfig = false">Отменить</v-btn>
+                        <v-btn color="blue darken-1" flat @click="setConfig">Сохранить</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-dialog>
@@ -119,22 +143,31 @@
                     max: e => (e && e.length <= 20) || 'Максимум 20 символов',
                     min: e => e.length >= 8 || 'Минимум 8 символов'
                 },
-                rows: [],
+                rr: [],
                 roles: [],
                 users: [],
+                reports: [],
+                rep: "Свод",
+                config: {depts: [], keys: [], roles: []},
                 newUser: {login: "", pass: "", role: "Стандарт"},
                 openKrits: false,
                 openUsers: false,
                 openNewUser: false,
+                openConfig: false,
                 userRoles: [],
                 snackbar: false,
                 msg: "",
             }
         },
+        computed: {
+            rows: function () {
+                return this.rr[this.reports.indexOf(this.rep)]
+            }
+        },
         methods: {
             sendData() {
                 this.openKrits = false;
-                axios.post("/admin/save", {data: this.rows})
+                axios.post("/admin/save", {data: this.rr})
                     .then(res => {
                         if (res.data.saved !== true) return;
                         this.msg = "Сохранено!";
@@ -142,9 +175,11 @@
                     })
             },
             getKrits() {
-                axios.get("/admin/krits")
+                axios.get("/admin/criteria")
                     .then(res => {
-                        this.rows = res.data.splice(1, res.data.length - 1)
+                        this.reports = res.data[0];
+                        console.log(res.data);
+                        this.rr = res.data[1];
                     });
             },
             getRoles() {
@@ -160,7 +195,21 @@
                         this.users = res.data;
                     })
             },
-            addKrit() {
+            getConfig() {
+                axios.get('/admin/config')
+                    .then(res => {
+                        this.config.depts = res.data.depts;
+                        this.config.keys = res.data.keys;
+                        this.config.roles = res.data.roles;
+                    })
+            },
+            setConfig() {
+                this.openConfig = false;
+                axios.post('/admin/config', {depts: this.config.depts, keys: this.config.keys, roles: this.config.roles})
+                    .then(res => console.log(res))
+                    .catch(err => console.log(err))
+            },
+            addCriteria() {
                 this.rows.push("");
                 Vue.nextTick(() => {
                     this.$refs.myref[this.rows.length - 1].focus();
@@ -178,7 +227,9 @@
             }
         },
         beforeCreate() {
-            if (localStorage.getItem('admin') !== 'true' || localStorage.getItem('auth' !== 'true'))
+            if (localStorage.getItem('admin') !== 'true')
+                this.$router.push("/404");
+            if (localStorage.getItem('auth') !== 'true')
                 this.$router.push("/404");
         }
     }
