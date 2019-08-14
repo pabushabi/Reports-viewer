@@ -11,9 +11,10 @@ const xlsx = require('node-xlsx').default;
 const pgp = require('pg-promise')();
 const db = pgp(config.path);
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 app.use(compression());
-app.use(serveStatic(__dirname + "/dist"));
 app.use(helmet());
+app.use(serveStatic(__dirname + "/dist"));
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
@@ -25,7 +26,7 @@ function parsit(file) {
     return xlsx.parse(`${file}.xlsx`)
 }
 
-function getRows(sheet) {
+function getRows() {
     let depts = config.depts;
     if (depts[0] !== "Свод") depts.splice(0, 0, "Свод");
     let rows = [depts];
@@ -79,12 +80,29 @@ function getPartialReport(name, keys) {
 
 const sheet = parsit(config.file);
 let userRoles = config.roles;
-for (let i = config.keys.length - 2; i >= 0; i--)
-    getPartialReport(config.depts[i], config.keys[i + 1]);
-getConsolidatedReport(config.keys[0]);
+const getReports = () => {
+    for (let i = config.keys.length - 2; i >= 0; i--)
+        getPartialReport(config.depts[i], config.keys[i + 1]);
+    getConsolidatedReport(config.keys[0]);
+    console.log(`get`);
+};
+getReports();
 
-app.post('/', (req, res) => {
-    res.json(sheet)
+app.post('/', async (req, res) => {
+    console.log(`'/' - ${req.headers.authorization}`);
+    await getReports();
+    jwt.verify(req.headers.authorization, config.passKey, (err, decoded) => {
+        if (err) {
+            console.log(err);
+            // res.json({auth: false})
+        } else {
+            console.log(decoded);
+            // if (decoded.role === "Админ" || decoded.role === "Ген. директор")
+            // res.json({auth: false})
+            //     res.json(sheet)
+        }
+    });
+    await res.json(sheet)
 });
 
 app.post('/login', jsonParser, (req, res) => {
@@ -93,13 +111,13 @@ app.post('/login', jsonParser, (req, res) => {
         .update(password)
         .digest('hex');
 
-    // console.log(req.body);
     db.one("SELECT pass, userrole FROM accounts WHERE login = $1", req.body.login)
         .then(data => {
             let {pass, userrole} = data;
             let isAuth = hashedPass === pass;
             let isAdmin = userrole === 'Админ';
             let token = jwt.sign({login: req.body.login, role: userrole}, config.passKey, {expiresIn: '12h'});
+            console.log(`'/login' generated - ${token} - ${isAuth}`);
             res.json({"auth": isAuth, "admin": isAdmin, "token": token})
         })
         .catch(err => {
@@ -112,6 +130,7 @@ app.get('/admin/roles', (req, res) => {
 });
 
 app.get('/admin/criteria', (req, res) => {
+    console.log(`-----${sheet[1].name}`);
     res.json(getRows(sheet[0].data));
 });
 
@@ -136,9 +155,13 @@ app.post('/admin/config', jsonParser, (req, res) => {
 });
 
 app.post('/admin/save', jsonParser, (req, res) => {
-    console.log(req.body);
-    console.log(req.body.data.length);
+    // console.log(req.body);
+    // console.log(req.body.data.length);
     if (sheet[0].name === "Сводный отчёт") sheet.splice(0, 1);
+    for (let i = 0; i < sheet.length; i++)
+        if (sheet[0].name.includes("Свод") || sheet[i].name.includes("свод"))
+            sheet.splice(0, 1);
+    console.log(req.body.data[0]);
     for (let i = 1; i < req.body.data.length; i++)
         getPartialReport(config.depts[i], req.body.data[i]);
     getConsolidatedReport(req.body.data[0]);
@@ -163,3 +186,27 @@ app.post('/admin/newuser', jsonParser, (req, res) => {
 app.listen(config.port, () => {
     console.log(`Server running at http://127.0.0.1:${config.port} (http://localhost:${config.port})`);
 });
+
+
+process.stdin.resume();     //cleanup before closing
+
+function exitHandler(options, exitCode) {
+    if (options.cleanup) {
+        fs.writeFileSync('config.json', JSON.stringify(config, null, 2));
+        console.log('Config saved');
+    }
+    if (exitCode || exitCode === 0) console.log(`Exit code: ${exitCode}`);
+    if (options.exit) process.exit();
+}
+
+process.on('exit', exitHandler.bind(null, {cleanup: true}));
+
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {exit: true}));
+
+// catches "kill pid" (for example: nodemon restart)
+process.on('SIGUSR1', exitHandler.bind(null, {exit: true}));
+process.on('SIGUSR2', exitHandler.bind(null, {exit: true}));
+
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {exit: true}));

@@ -5,12 +5,12 @@
         <v-layout justify-center row fill-height>
             <v-dialog v-model="openKrits" max-width="600px">
                 <template #activator="{ on }">
-                    <v-btn color="info" v-on="on" @click="getKrits">показать критерии</v-btn>
+                    <v-btn color="primary" v-on="on" @click="getKrits" large>показать критерии</v-btn>
                 </template>
                 <v-card>
-                    <v-card-title>
-                        <span class="headline">Критерии сбора отчёта</span>
-                    </v-card-title>
+                    <v-toolbar color="primary" flat dark>
+                        <v-toolbar-title class="headline">Критерии сбора отчёта</v-toolbar-title>
+                    </v-toolbar>
                     <v-card-text>
                         <v-container grid-list-md>
                             <v-select label="Отчёт" :items="reports" v-model="rep" class="ma-1"></v-select>
@@ -36,12 +36,12 @@
 
             <v-dialog v-model="openConfig" max-width="600px">
                 <template #activator="{ on }">
-                    <v-btn color="info" v-on="on" @click="getConfig">показать config</v-btn>
+                    <v-btn color="primary" v-on="on" @click="getConfig" large>показать config</v-btn>
                 </template>
                 <v-card>
-                    <v-card-title>
-                        <span class="headline">Конфигурационный файл</span>
-                    </v-card-title>
+                    <v-toolbar color="primary" flat dark>
+                        <v-toolbar-title class="headline">Конфигурационный файл</v-toolbar-title>
+                    </v-toolbar>
                     <v-card-text>
                         <v-container grid-list-md>
                                 <v-textarea v-model="config.depts" auto-grow label="depts" rows="1"></v-textarea>
@@ -59,12 +59,12 @@
 
             <v-dialog v-model="openUsers" max-width="600px">
                 <template #activator="{ on }">
-                    <v-btn color="info" v-on="on" @click="getUsers">показать пользователей</v-btn>
+                    <v-btn color="primary" v-on="on" @click="getUsers" large>показать пользователей</v-btn>
                 </template>
                 <v-card>
-                    <v-card-title>
-                        <span class="headline">Список пользователей</span>
-                    </v-card-title>
+                    <v-toolbar color="primary" flat dark>
+                        <v-toolbar-title class="headline">Список пользователей</v-toolbar-title>
+                    </v-toolbar>
                     <v-card-text>
                         <v-container grid-list-md>
                             <v-layout wrap>
@@ -89,12 +89,12 @@
 
             <v-dialog v-model="openNewUser" max-width="600px">
                 <template #activator="{ on }">
-                    <v-btn color="info" v-on="on" @click="getRoles">добавить пользователя</v-btn>
+                    <v-btn color="primary" v-on="on" @click="getRoles" large>добавить пользователя</v-btn>
                 </template>
                 <v-card>
-                    <v-card-title>
-                        <span class="headline">Добавление пользователя</span>
-                    </v-card-title>
+                    <v-toolbar color="primary" flat dark>
+                        <v-toolbar-title class="headline">Добавление пользователя</v-toolbar-title>
+                    </v-toolbar>
                     <v-card-text>
                         <v-container grid-list-md>
                             <v-form ref="form" lazy-validation>
@@ -132,7 +132,7 @@
     import Appheader from "@/components/appheader";
     import axios from "axios";
     import Vue from "vue"
-
+;
     export default {
         name: "admin",
         components: {Appheader},
@@ -149,7 +149,7 @@
                 reports: [],
                 rep: "Свод",
                 config: {depts: [], keys: [], roles: []},
-                newUser: {login: "", pass: "", role: "Стандарт"},
+                newUser: {login: "", pass: "", role: "Стандарт исп"},
                 openKrits: false,
                 openUsers: false,
                 openNewUser: false,
@@ -226,11 +226,5 @@
                     });
             }
         },
-        beforeCreate() {
-            if (localStorage.getItem('admin') !== 'true')
-                this.$router.push("/404");
-            if (localStorage.getItem('auth') !== 'true')
-                this.$router.push("/404");
-        }
     }
 </script>

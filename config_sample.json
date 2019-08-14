@@ -1,6 +1,6 @@
 {
   "port": "8001",
-  "maxAge": "24",
+  "expires": "12h",
   "file": "3-1",
   "passKey": "123456",
   "path": "postgres://username:password@127.0.0.1/tablename",

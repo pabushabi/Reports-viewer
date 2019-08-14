@@ -1,6 +1,6 @@
 <template>
     <v-data-table :headers="headers" :items="table"
-                  hide-actions :loading="!loaded">
+                  hide-actions>
         <template #items="props">
             <td v-for="(item, index) in headers" @dblclick="getCell(props.item, index)">
 <!--                <v-edit-dialog :return-value.sync="props.item.name" lazy @save="save" @cancel="cancel" @open="open"-->
@@ -34,7 +34,7 @@
 <script>
     export default {
         name: "apptable",
-        props: ['name', 'table', 'loaded'],
+        props: ['name', 'table'],
         data() {
             return {
                 headers: [

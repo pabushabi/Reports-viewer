@@ -4,7 +4,7 @@
         <v-layout align-center column justify-center>
             <h1 class="text-xs-center">404</h1>
             <h2 class="text-md-center">Здесь ничего нет. Как вы сюда попали?</h2>
-            <v-btn to="/" flat>Вернуться домой</v-btn>
+            <v-btn to="/" outline>Вернуться домой</v-btn>
         </v-layout>
     </v-app>
 </template>
